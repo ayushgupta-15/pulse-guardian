@@ -1,3 +1,0 @@
-cd ~/Documents/Programming/health-risk-ai/apps/backend
-source venv/bin/activate
-python3 -m uvicorn app.main:app --reload
