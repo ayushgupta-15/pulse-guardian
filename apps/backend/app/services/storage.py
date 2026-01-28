@@ -1,7 +1,7 @@
 from collections import deque
 from typing import Dict, List, Optional
 
-from app.models.schemas import PatientInfo, VitalsResponse
+from app.models.schemas import PatientInfo, VitalsRecord
 
 
 class InMemoryStorage:
@@ -37,7 +37,7 @@ class InMemoryStorage:
             ),
         }
 
-    def add_vitals(self, vitals: VitalsResponse):
+    def add_vitals(self, vitals: VitalsRecord):
         """Add new vitals reading."""
         patient_id = vitals.patient_id
 
@@ -46,17 +46,26 @@ class InMemoryStorage:
 
         self.vitals_history[patient_id].append(vitals)
 
-        # Update patient status based on risk level
-        if patient_id in self.patients:
-            self.patients[patient_id].status = vitals.risk_level.lower()
+        # Auto-create patient if missing
+        if patient_id not in self.patients:
+            self.patients[patient_id] = PatientInfo(
+                patient_id=patient_id,
+                name="Unknown",
+                age=0,
+                room="Unassigned",
+                status="stable",
+            )
 
-    def get_latest_vitals(self, patient_id: str) -> Optional[VitalsResponse]:
+        # Update patient status based on risk level
+        self.patients[patient_id].status = vitals.risk_level.lower()
+
+    def get_latest_vitals(self, patient_id: str) -> Optional[VitalsRecord]:
         """Get most recent vitals for a patient."""
         if patient_id in self.vitals_history and len(self.vitals_history[patient_id]) > 0:
             return self.vitals_history[patient_id][-1]
         return None
 
-    def get_vitals_history(self, patient_id: str, limit: int = 20) -> List[VitalsResponse]:
+    def get_vitals_history(self, patient_id: str, limit: int = 20) -> List[VitalsRecord]:
         """Get recent vitals history."""
         if patient_id not in self.vitals_history:
             return []

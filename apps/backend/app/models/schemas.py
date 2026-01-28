@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -24,17 +23,31 @@ class VitalsInput(BaseModel):
         }
 
 
-class VitalsResponse(BaseModel):
-    """Response after processing vitals."""
-
-    patient_id: str
+class VitalsCore(BaseModel):
     heart_rate: int
     spo2: int
     temperature: float
-    timestamp: float
-    risk_score: float
-    risk_level: str
+
+
+class RiskOut(BaseModel):
+    score: float = Field(ge=0, le=100)
+    level: str
     message: str
+    reasons: List[str] = Field(default_factory=list)
+
+
+class VitalsOut(BaseModel):
+    """Unified response payload for vitals endpoints."""
+
+    patient_id: str
+    timestamp: str
+    vitals: VitalsCore
+    risk: RiskOut
+
+
+class VitalsHistoryResponse(BaseModel):
+    patient_id: str
+    history: List[VitalsOut]
 
 
 class RiskAssessment(BaseModel):
@@ -61,5 +74,19 @@ class PatientVitalsHistory(BaseModel):
 
     patient_id: str
     name: str
-    current_vitals: Optional[VitalsResponse] = None
-    history: List[VitalsResponse] = Field(default_factory=list)
+    current_vitals: Optional[VitalsOut] = None
+    history: List[VitalsOut] = Field(default_factory=list)
+
+
+class VitalsRecord(BaseModel):
+    """Internal storage record with epoch timestamp."""
+
+    patient_id: str
+    heart_rate: int
+    spo2: int
+    temperature: float
+    timestamp: float
+    risk_score: float
+    risk_level: str
+    message: str
+    reasons: List[str] = Field(default_factory=list)

@@ -1,8 +1,10 @@
 import os
 import sys
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if REPO_ROOT not in sys.path:
@@ -24,6 +26,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Consistent error responses
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == 404:
+        error = "not_found"
+    elif exc.status_code == 400:
+        error = "bad_request"
+    else:
+        error = "http_error"
+    return JSONResponse(status_code=exc.status_code, content={"error": error, "detail": exc.detail})
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    missing_field = any(err.get("type") == "missing" for err in exc.errors())
+    status_code = 400 if missing_field else 422
+    return JSONResponse(
+        status_code=status_code,
+        content={"error": "validation_error", "detail": exc.errors()},
+    )
 
 # Include routers
 app.include_router(vitals.router)

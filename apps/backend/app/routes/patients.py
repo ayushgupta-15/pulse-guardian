@@ -1,6 +1,8 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException
 
-from app.models.schemas import PatientInfo, PatientVitalsHistory
+from app.models.schemas import PatientInfo, PatientVitalsHistory, RiskOut, VitalsCore, VitalsOut, VitalsRecord
 from app.services.storage import storage
 
 router = APIRouter(prefix="/patients", tags=["Patients"])
@@ -23,9 +25,26 @@ async def get_patient_with_vitals(patient_id: str):
     current_vitals = storage.get_latest_vitals(patient_id)
     history = storage.get_vitals_history(patient_id, limit=10)
 
+    def to_out(record: VitalsRecord) -> VitalsOut:
+        return VitalsOut(
+            patient_id=record.patient_id,
+            timestamp=datetime.fromtimestamp(record.timestamp, tz=timezone.utc).isoformat(),
+            vitals=VitalsCore(
+                heart_rate=record.heart_rate,
+                spo2=record.spo2,
+                temperature=record.temperature,
+            ),
+            risk=RiskOut(
+                score=record.risk_score,
+                level=record.risk_level,
+                message=record.message,
+                reasons=record.reasons,
+            ),
+        )
+
     return PatientVitalsHistory(
         patient_id=patient.patient_id,
         name=patient.name,
-        current_vitals=current_vitals,
-        history=history,
+        current_vitals=to_out(current_vitals) if current_vitals else None,
+        history=[to_out(item) for item in history],
     )
