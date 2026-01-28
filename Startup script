@@ -1,4 +1,0 @@
-ash@ASUS:~/Documents/Programming/health-risk-ai/backend$ cd ~/Documents/Programming/health-risk-ai/backend
-ash@ASUS:~/Documents/Programming/health-risk-ai/backend$ source venv/bin/activate
-(venv) ash@ASUS:~/Documents/Programming/health-risk-ai/backend$ uvicorn app.main:app --reload
-

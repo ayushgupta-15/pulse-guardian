@@ -34,3 +34,8 @@ Thumbs.db
 # Local env files
 .env
 .env.*
+
+# Data / artifacts / notebooks
+data/
+artifacts/
+notebooks/

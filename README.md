@@ -12,31 +12,35 @@ risk assessment. It includes:
 Repository structure
 --------------------
 
-health-risk-ai/
-  backend/         FastAPI app and services
-  frontend-web/    Next.js web dashboard
-  frontend-mobile/ Expo mobile app
-  simulator/       Vitals simulator
+pulse-guardian/
+  apps/
+    backend/       FastAPI app and services
+    web/           Next.js web dashboard
+    mobile/        Expo mobile app
+    simulator/     Vitals simulator
+  packages/        Shared libs (future)
+  docs/            Documentation
+  scripts/         Helper scripts
 
 Quick start
 -----------
 
 Backend:
-  cd backend
+  cd apps/backend
   source venv/bin/activate
   python app/main.py
 
 Simulator:
-  cd simulator
+  cd apps/simulator
   python vitals_simulator.py
 
 Web:
-  cd frontend-web
+  cd apps/web
   npm run dev
   open http://localhost:3000/
 
 Mobile:
-  cd frontend-mobile
+  cd apps/mobile
   npm start
 
 Notes
@@ -44,3 +48,4 @@ Notes
 - The backend exposes REST endpoints at http://localhost:8000
 - The web and mobile apps poll for latest vitals and update live
 - The simulator can be configured for normal/warning/critical scenarios
+- Large datasets, notebooks, and model artifacts are stored outside git. See docs/data-and-models.md
